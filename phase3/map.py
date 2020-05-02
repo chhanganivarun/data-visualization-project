@@ -116,8 +116,8 @@ world_map = dcc.Graph(id='world-map', figure=px.choropleth(
 indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
                                                                               (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
 
-piechart = dcc.Graph(id='pie-chart', figure=px.pie( idsdata_[(idsdata_['Country Code'] == "IND") & ((idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') or (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') or (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD'))],
- values='source', names='Indicator Code', title='Net financial flow from various agencies'  ))
+piechart = dcc.Graph(id='pie-chart', figure=px.pie(idsdata_[(idsdata_['Country Code'] == "IND") & (idsdata_['Year'] == 2008) & ((idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') | (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') | (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD'))],
+                                                   values='Value', names='Indicator Name', title='Net financial flow from various agencies'))
 
 main_space = html.Div(className="mid-pane", children=[
     world_map,
@@ -168,9 +168,9 @@ def update_world_map(selected_value):
     return px.choropleth(locations=selected_value)
 
 
-@app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
-def update_ind_line_chart(country_vals, ind_val, time_val):
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
+# @app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
+# def update_ind_line_chart(country_vals, ind_val, time_val):
+#     return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
 
 
 @app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
