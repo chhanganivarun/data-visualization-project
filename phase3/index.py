@@ -135,19 +135,14 @@ main_space = html.Div(className="mid-pane", children=[
         value='DT.NFL.MOTH.CD',
     ),
 
-    html.Label('Slider'),
-    dcc.Slider(
-        min=1970,
-        max=2026,
-        marks={i: 'Label {}'.format(i) if i == 1 else str(i)
-               for i in range(1, 6)},
-        value=5,
-    ),
     html.Label('Time window'),
     dcc.RangeSlider(
         id='time-window-slider',
         min=1970,
         max=2018,
+        marks={i: 'Label {}'.format(i) if i == 1 else str(i)
+               for i in range(1970, 2018, 10)},
+
         step=1,
         value=[2008, 2018]
     ),
@@ -185,11 +180,16 @@ def update_range_display(time_val):
     return [html.Label('{} - {}'.format(time_val[0], time_val[1]))]
 
 
-app.layout = html.Div(className="row", children=[
-    html.Div(className="left-panel", children=[
-        side_elements
+app.layout = html.Div(children=[
+    html.Div(className='row', children=[
+        # Hyper links
     ]),
-    main_space,
+    html.Div(className="row", children=[
+        html.Div(className="left-panel", children=[
+            side_elements
+        ]),
+        main_space,
+    ])
 ])
 # webbrowser.open('http://localhost:8050', new=2)
 print(app)
