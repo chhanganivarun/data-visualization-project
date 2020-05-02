@@ -1,3 +1,4 @@
+import webbrowser
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -23,6 +24,7 @@ idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
 
 idsdata_ = idsdata.melt(id_vars=['Country Name', 'Country Code', 'Indicator Name',
                                  'Indicator Code'], var_name='Year', value_name='Value').fillna(0)
+idsdata_['Year'] = idsdata_['Year'].apply(lambda x: int(x))
 
 footnote = pd.read_csv('../IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
@@ -69,6 +71,13 @@ idsdata[(idsdata['Country Code'].isin(country_codes)) &
 
 dropdown_options = [{'label': y, 'value': x} for x, y in countries_codes_names]
 
+piechart_options = [
+    {'label': 'Modes Bilateral/Multilateral/Others', 'value': 'mode'},
+    # ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD']
+    {'label': 'Sources IMF/IDA/IBRD/RDB', 'value': 'source'},
+    {'label': 'Type concessional/nonconcessional', 'value': 'type'}]
+# ['DT.NFL.IMFC.CD','DT.NFL.IMFN.CD','DT.NFL.MIBR.CD','DT.NFL.MIDA.CD','DT.NFL.RDBC.CD','DT.NFL.RDBN.CD']
+
 
 def generate_table(dataframe, max_rows=10):
     return html.Table([
@@ -90,7 +99,7 @@ side_elements = html.Div(className='column', children=[
     html.Div(id='table', className='table-pane', children=[
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_[
-                       'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= str(2018))], max_rows=np.inf)
+                       'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], max_rows=np.inf)
 
     ]),
     html.Div(className='text-pane', children=[
@@ -105,7 +114,7 @@ world_map = dcc.Graph(id='world-map', figure=px.choropleth(
 
 
 indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= str(2018))], x="Year", y="Value", color='Country Name'))
+                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
 
 
 main_space = html.Div(className="mid-pane", children=[
@@ -134,6 +143,15 @@ main_space = html.Div(className="mid-pane", children=[
                for i in range(1, 6)},
         value=5,
     ),
+    html.Label('Time window'),
+    dcc.RangeSlider(
+        id='time-window-slider',
+        min=1970,
+        max=2018,
+        step=1,
+        value=[2008, 2018]
+    ),
+    html.Label(id='Range'),
 
     indicator_line_chart,
 
@@ -145,19 +163,21 @@ def update_world_map(selected_value):
     return px.choropleth(locations=selected_value)
 
 
-@app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value')])
-def update_ind_line_chart(country_vals, ind_val):
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= str(2018))], x="Year", y="Value", color="Country Name")
+@app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
+def update_ind_line_chart(country_vals, ind_val, time_val):
+    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
 
 
-@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value')])
-def update_table(country_vals, ind_val):
+@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
+def update_table(country_vals, ind_val, time_val):
     return [
         html.Label('Data'),
-        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_[
-            'Indicator Code'] == ind_val)], max_rows=np.inf)
+        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (
+            idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], max_rows=np.inf)
     ]
 
+
+# @app.callback(Output(''))
 
 app.layout = html.Div(className="row", children=[
     html.Div(className="left-panel", children=[
@@ -165,7 +185,8 @@ app.layout = html.Div(className="row", children=[
     ]),
     main_space,
 ])
-
+# webbrowser.open('http://localhost:8050', new=2)
+print(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True, use_reloader=True)
