@@ -87,9 +87,11 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
 side_elements = html.Div(className='column', children=[
-    html.Div(className='table-pane', children=[
+    html.Div(id='table', className='table-pane', children=[
         html.Label('Data'),
-        generate_table(countries, np.inf),
+        generate_table(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_[
+                       'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= str(2018))], max_rows=np.inf)
+
     ]),
     html.Div(className='text-pane', children=[
         html.Label('text'),
@@ -99,15 +101,16 @@ side_elements = html.Div(className='column', children=[
 ])
 
 world_map = dcc.Graph(id='world-map', figure=px.choropleth(
-    locations=["CHN", "USA", "IND", 'LMY', 'EAP']))
+    locations=['IND', 'CHN']))
 
 
 indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                              (idsdata_['Indicator Code'].isin(['DT.NFL.MOTH.CD']))], x="Year", y="Value", color='Country Name'))
+                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= str(2018))], x="Year", y="Value", color='Country Name'))
 
 
 main_space = html.Div(className="mid-pane", children=[
     world_map,
+
     html.Label('Countries'),
     dcc.Dropdown(
         id='countries',
@@ -115,12 +118,14 @@ main_space = html.Div(className="mid-pane", children=[
         value=['IND', 'CHN'],
         multi=True
     ),
+
     html.Label('Indicator'),
     dcc.Dropdown(
         id='indicators',
         options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
         value='DT.NFL.MOTH.CD',
     ),
+
     html.Label('Slider'),
     dcc.Slider(
         min=1970,
@@ -129,6 +134,7 @@ main_space = html.Div(className="mid-pane", children=[
                for i in range(1, 6)},
         value=5,
     ),
+
     indicator_line_chart,
 
 ])
@@ -140,12 +146,17 @@ def update_world_map(selected_value):
 
 
 @app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value')])
-def update_ind_line_chart(country_vals, ind_vals):
-    print(country_vals)
-    print(ind_vals)
-    print(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_[
-          'Indicator Code'] == ind_vals)]['Country Name'])
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_vals)], x="Year", y="Value", color="Country Name")
+def update_ind_line_chart(country_vals, ind_val):
+    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= str(2018))], x="Year", y="Value", color="Country Name")
+
+
+@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value')])
+def update_table(country_vals, ind_val):
+    return [
+        html.Label('Data'),
+        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_[
+            'Indicator Code'] == ind_val)], max_rows=np.inf)
+    ]
 
 
 app.layout = html.Div(className="row", children=[
