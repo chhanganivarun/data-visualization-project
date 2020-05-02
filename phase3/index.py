@@ -25,13 +25,19 @@ def generate_table(dataframe, max_rows=10):
 
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+side_elements = html.Div(className='column', children=[
+    html.Div(className='table-pane', children=[
+        html.Label('Data'),
+        generate_table(df, np.inf),
+    ]),
+    html.Div(className='text-pane', children=[
+        html.Label('Data'),
+        # generate_table(df, np.inf),
+    ]),
 
-side_elements = html.Div(children=[
-    html.Label('Data'),
-    generate_table(df, np.inf)
 ])
 
-main_space = html.Div(children=[
+main_space = html.Div(className='mid-pane', children=[
     html.Label('Dropdown'),
     dcc.Dropdown(
         options=[
@@ -84,12 +90,19 @@ main_space = html.Div(children=[
                for i in range(1, 6)},
         value=5,
     ),
+
 ], style={'columnCount': 2})
 
+
 app.layout = html.Div(className="row", children=[
-    html.Div(className="col-lg-2 left-panel", children=[side_elements]),
-    html.Div(className="col-lg-10", children=[
+    html.Div(className="left-panel", children=[
+        side_elements
+    ]),
+    html.Div(className="mid-pane", children=[
         main_space
+    ]),
+    html.Div(className='right-pane', children=[
+        html.H3('Hello')
     ])
 ])
 

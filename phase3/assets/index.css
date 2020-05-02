@@ -1,13 +1,33 @@
 .left-panel {
-	height: 50%; /* Full-height: remove this if you want "auto" height */
-	width: 20%; /* Set the width of the sidebar */
-	position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+	width: 30%; /* Set the width of the sidebar */
+	height: 100%;
 	overflow: auto;
-	left: 0;
-	padding-top: 20px;
 }
+.mid-pane {
+	width: 59%; /* Set the width of the sidebar */
+	float: left;
+}
+.right-panel {
+	width: 1%;
+	float: right;
+	overflow: hidden;
+}
+.text-pane {
+	height: 100%;
 
+	/* width: 20%; */
+	overflow: auto;
+}
+.table-pane {
+	height: 400px;
+	/* width: 20%; */
+	overflow: scroll;
+}
 .row {
-	display: table;
+	/* display: table; */
 	width: 100%;
+}
+.column {
+	display: table;
+	height: 100%;
 }
