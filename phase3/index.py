@@ -151,7 +151,10 @@ main_space = html.Div(className="mid-pane", children=[
         step=1,
         value=[2008, 2018]
     ),
-    html.Label(id='Range'),
+    html.Div(id='Range', children=[
+        html.Label('2000 - 2000'),
+    ]),
+
 
     indicator_line_chart,
 
@@ -177,7 +180,10 @@ def update_table(country_vals, ind_val, time_val):
     ]
 
 
-# @app.callback(Output(''))
+@app.callback(Output('Range', 'children'), [Input('time-window-slider', 'value')])
+def update_range_display(time_val):
+    return [html.Label('{} - {}'.format(time_val[0], time_val[1]))]
+
 
 app.layout = html.Div(className="row", children=[
     html.Div(className="left-panel", children=[
