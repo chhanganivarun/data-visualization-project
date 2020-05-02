@@ -31,13 +31,13 @@ side_elements = html.Div(className='column', children=[
         generate_table(df, np.inf),
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('Data'),
+        html.Label('text'),
         # generate_table(df, np.inf),
     ]),
 
 ])
 
-main_space = html.Div(className='mid-pane', children=[
+main_space = html.Div(className="mid-pane", children=[
     html.Label('Dropdown'),
     dcc.Dropdown(
         options=[
@@ -98,12 +98,7 @@ app.layout = html.Div(className="row", children=[
     html.Div(className="left-panel", children=[
         side_elements
     ]),
-    html.Div(className="mid-pane", children=[
-        main_space
-    ]),
-    html.Div(className='right-pane', children=[
-        html.H3('Hello')
-    ])
+    main_space
 ])
 
 

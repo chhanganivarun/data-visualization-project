@@ -1,33 +1,29 @@
-.left-panel {
-	width: 30%; /* Set the width of the sidebar */
-	height: 100%;
-	overflow: auto;
+* {
+	margin: 0;
+	padding: 0;
 }
-.mid-pane {
-	width: 59%; /* Set the width of the sidebar */
-	float: left;
-}
-.right-panel {
-	width: 1%;
-	float: right;
-	overflow: hidden;
-}
-.text-pane {
-	height: 100%;
 
-	/* width: 20%; */
+.row {
+	display: flex;
+}
+
+.left-panel {
+	display: flex;
+	flex-direction: column;
+	width: 30%;
+	height: 100vh;
+}
+
+.table-pane {
+	height: 50vh;
 	overflow: auto;
 }
-.table-pane {
-	height: 400px;
-	/* width: 20%; */
-	overflow: scroll;
+
+.text-pane {
+	height: 50vh;
+	overflow: auto;
 }
-.row {
-	/* display: table; */
-	width: 100%;
-}
-.column {
-	display: table;
-	height: 100%;
+
+.mid-pane {
+	width: 70%;
 }
