@@ -1,0 +1,13 @@
+.left-panel {
+	height: 50%; /* Full-height: remove this if you want "auto" height */
+	width: 20%; /* Set the width of the sidebar */
+	position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+	overflow: auto;
+	left: 0;
+	padding-top: 20px;
+}
+
+.row {
+	display: table;
+	width: 100%;
+}
