@@ -10,30 +10,24 @@ external_stylesheets = [
 ]
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/c78bf172206ce24f77d6363a2d754b59/raw/c353e8ef842413cae56ae3920b8fd78468aa4cb2/usa-agricultural-exports-2011.csv')
 
-country_series = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDScountry-series.csv')
+country_series = pd.read_csv('../IDS_CSV/IDScountry-series.csv')
 country_series.drop(['Unnamed: 3'], axis=1, inplace=True)
 
-country = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDSCountry.csv')
+country = pd.read_csv('../IDS_CSV/IDSCountry.csv')
 country.drop(['Unnamed: 31'], axis=1, inplace=True)
 
-idsdata = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDSData.csv')
+idsdata = pd.read_csv('../IDS_CSV/IDSData.csv')
 idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
 
-footnote = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDSfootnote.csv')
+footnote = pd.read_csv('../IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
 
-series = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDSSeries.csv')
+series = pd.read_csv('../IDS_CSV/IDSSeries.csv')
 series.drop(['Unnamed: 20'], axis=1, inplace=True)
 
-series_time = pd.read_csv(
-    'https://raw.githubusercontent.com/chhanganivarun/data-visualization-project/master/IDS_CSV/IDSseries-time.csv')
+series_time = pd.read_csv('../IDS_CSV/IDSseries-time.csv')
 series_time.drop(['Unnamed: 3'], axis=1, inplace=True)
-
+print('CSVs loaded')
 ind_str = """
 Net financial flows, others
 Net financial flows, bilateral (NFL, current US$)"""
@@ -66,6 +60,11 @@ idsdata[(idsdata['Country Code'].isin(country_codes)) &
         (idsdata['Indicator Code'].isin(indicator_codes))]
 
 
+dropdown_options = [{'label': x, 'value': y} for x, y in countries_codes_names]
+
+print('initial processing')
+
+
 def generate_table(dataframe, max_rows=10):
     return html.Table([
         html.Thead(
@@ -80,10 +79,13 @@ def generate_table(dataframe, max_rows=10):
 
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+print('app started')
+
 side_elements = html.Div(className='column', children=[
     html.Div(className='table-pane', children=[
         html.Label('Data'),
-        generate_table(idsdata, np.inf),
+        generate_table(countries, np.inf),
     ]),
     html.Div(className='text-pane', children=[
         html.Label('text'),
@@ -92,16 +94,17 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
+print('side_elements generated')
 main_space = html.Div(className="mid-pane", children=[
     html.Label('Dropdown'),
     dcc.Dropdown(
-        options=[{'label': x, 'value': y} for x, y in countries_codes_names],
+        options=dropdown_options,
         value='IND'
     ),
 
     html.Label('Multi-Select Dropdown'),
     dcc.Dropdown(
-        options=[{'label': x, 'value': y} for x, y in countries_codes_names],
+        options=dropdown_options,
         value=['IND', 'CHN'],
         multi=True
     ),
@@ -114,16 +117,19 @@ main_space = html.Div(className="mid-pane", children=[
         value=5,
     ),
 
-], style={'columnCount': 2})
+])
+print('main_space generated')
 
-
+print('Main')
 app.layout = html.Div(className="row", children=[
     html.Div(className="left-panel", children=[
         side_elements
     ]),
     main_space
 ])
+print('layout')
 
 
 if __name__ == '__main__':
     app.run_server(debug=True, use_reloader=True)
+    print(app.hostname)
