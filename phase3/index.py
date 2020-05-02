@@ -98,25 +98,28 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
-main_space = html.Div(className="mid-pane", children=[
-    html.Label('Dropdown'),
-    dcc.Dropdown(
-        options=dropdown_options,
-        value='IND'
-    ),
+world_map = dcc.Graph(id='world-map', figure=px.choropleth(
+    locations=["CHN", "USA", "IND", 'LMY', 'EAP']))
 
+
+indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
+                                                                              (idsdata_['Indicator Code'].isin(['DT.NFL.MOTH.CD']))], x="Year", y="Value", color='Country Name'))
+
+
+main_space = html.Div(className="mid-pane", children=[
+    world_map,
     html.Label('Countries'),
     dcc.Dropdown(
         id='countries',
         options=dropdown_options,
-        value=['IND', ],
+        value=['IND', 'CHN'],
         multi=True
     ),
     html.Label('Indicator'),
     dcc.Dropdown(
         id='indicators',
         options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
-        value=[],
+        value='DT.NFL.MOTH.CD',
     ),
     html.Label('Slider'),
     dcc.Slider(
@@ -126,14 +129,9 @@ main_space = html.Div(className="mid-pane", children=[
                for i in range(1, 6)},
         value=5,
     ),
+    indicator_line_chart,
 
 ])
-world_map = dcc.Graph(id='world-map', figure=px.choropleth(
-    locations=["CHN", "USA", "IND", 'LMY', 'EAP']))
-
-
-indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND'])) &
-                                                                              (idsdata_['Indicator Code'].isin(['DT.NFL.MOTH.CD']))], x="Year", y="Value", color='Country Name'))
 
 
 @app.callback(Output('world-map', 'figure'), [Input('countries', 'value')])
@@ -143,7 +141,11 @@ def update_world_map(selected_value):
 
 @app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value')])
 def update_ind_line_chart(country_vals, ind_vals):
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'].isin(ind_vals))], x="Year", y="Value", color='Country Name')
+    print(country_vals)
+    print(ind_vals)
+    print(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_[
+          'Indicator Code'] == ind_vals)]['Country Name'])
+    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_vals)], x="Year", y="Value", color="Country Name")
 
 
 app.layout = html.Div(className="row", children=[
@@ -151,8 +153,6 @@ app.layout = html.Div(className="row", children=[
         side_elements
     ]),
     main_space,
-    world_map,
-    indicator_line_chart
 ])
 
 
