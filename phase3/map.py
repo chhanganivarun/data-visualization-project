@@ -5,6 +5,7 @@ import dash_html_components as html
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
 external_stylesheets = [
@@ -74,8 +75,7 @@ dropdown_options = [{'label': y, 'value': x} for x, y in countries_codes_names]
 piechart_options = [
     {'label': 'Modes Bilateral/Multilateral/Others', 'value': 'mode'},
     # ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD']
-    {'label': 'Sources IMF/IDA/IBRD/RDB', 'value': 'source'},
-    {'label': 'Type concessional/nonconcessional', 'value': 'type'}]
+    {'label': 'Sources IMF/IDA/IBRD/RDB', 'value': 'source'}]
 # ['DT.NFL.IMFC.CD','DT.NFL.IMFN.CD','DT.NFL.MIBR.CD','DT.NFL.MIDA.CD','DT.NFL.RDBC.CD','DT.NFL.RDBN.CD']
 
 
@@ -110,14 +110,20 @@ side_elements = html.Div(className='column', children=[
 ])
 
 world_map = dcc.Graph(id='world-map', figure=px.choropleth(
-    locations=['IND', 'CHN']))
+    locations=['IND']))
 
 
-indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
+bar_graph = dcc.Graph(id='bar-graph', figure=go.Figure(data=[
+    go.Bar(name='Net financial flows, bilateral (NFL, current US$)', x=['IND'], y=idsdata_[(idsdata_[
+           'Country Code'].isin(['IND'])) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+    go.Bar(name='Net financial flows, multilateral (NFL, current US$)', x=['IND'], y=idsdata_[(idsdata_[
+           'Country Code'].isin(['IND'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+    go.Bar(name='Net financial flows, others (NFL, current US$)', x=['IND'], y=idsdata_[(idsdata_[
+           'Country Code'].isin(['IND'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+]))
 
-piechart = dcc.Graph(id='pie-chart', figure=px.pie(idsdata_[(idsdata_['Country Code'] == "IND") & (idsdata_['Year'] == 2008) & ((idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') | (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') | (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD'))],
-                                                   values='Value', names='Indicator Name', title='Net financial flow from various agencies'))
+piechart = dcc.Graph(id='pie-chart', figure=px.pie(idsdata_[(idsdata_['Country Code'] == "IND") & (idsdata_['Year'] == 2008) & (idsdata_['Indicator Code'].isin(
+    ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD']))], values='Value', names='Indicator Name', title='Net financial flow from various agencies'))
 
 main_space = html.Div(className="mid-pane", children=[
     world_map,
@@ -126,65 +132,74 @@ main_space = html.Div(className="mid-pane", children=[
     dcc.Dropdown(
         id='countries',
         options=dropdown_options,
-        value=['IND', 'CHN'],
-        multi=True
+        value='IND',
     ),
 
-    html.Label('Indicator'),
+    html.Label('Feature'),
     dcc.Dropdown(
-        id='indicators',
-        options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
-        value='DT.NFL.MOTH.CD',
+        id='feature',
+        options=piechart_options,
+        value='mode',
     ),
 
-    html.Label('Slider'),
+    html.Label('Year'),
     dcc.Slider(
-        min=1970,
-        max=2026,
-        marks={i: 'Label {}'.format(i) if i == 1 else str(i)
-               for i in range(1, 6)},
-        value=5,
-    ),
-    html.Label('Time window'),
-    dcc.RangeSlider(
-        id='time-window-slider',
+        id='time',
         min=1970,
         max=2018,
-        step=1,
-        value=[2008, 2018]
+        marks={i: 'Label {}'.format(i) if i == 1 else str(i)
+               for i in range(1970, 2018, 10)},
+        value=2008,
     ),
-    html.Div(id='Range', children=[
-        html.Label('2000 - 2000'),
+    html.Div(id='year_holder', children=[
+        html.Label('2008'),
     ]),
-
-
     piechart,
+    bar_graph,
 
 ])
 
 
 @app.callback(Output('world-map', 'figure'), [Input('countries', 'value')])
 def update_world_map(selected_value):
-    return px.choropleth(locations=selected_value)
+    return px.choropleth(locations=[selected_value])
 
 
-# @app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
-# def update_ind_line_chart(country_vals, ind_val, time_val):
-#     return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
+@app.callback(Output('bar-graph', 'figure'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
+def update_bar_graph(country_val, ind_val, time_val):
+    ind_list = ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'] if ind_val == 'mode' else [
+        'DT.NFL.IMFC.CD', 'DT.NFL.IMFN.CD', 'DT.NFL.MIBR.CD', 'DT.NFL.MIDA.CD', 'DT.NFL.RDBC.CD', 'DT.NFL.RDBN.CD']
+
+    return go.Figure(data=[
+        go.Bar(name=series[series['Series Code'] == x]['Indicator Name'].to_list()[0], x=[country_val], y=idsdata_[(idsdata_[
+            'Country Code'].isin([country_val])) & (idsdata_['Indicator Code'] == x) & (idsdata_['Year'] == time_val)]['Value'].to_list())
+        for x in ind_list
+    ])
 
 
-@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
-def update_table(country_vals, ind_val, time_val):
+@app.callback(Output('pie-chart', 'figure'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
+def update_pie_chart(country_val, ind_val, time_val):
+    ind_list = ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'] if ind_val == 'mode' else [
+        'DT.NFL.IMFC.CD', 'DT.NFL.IMFN.CD', 'DT.NFL.MIBR.CD', 'DT.NFL.MIDA.CD', 'DT.NFL.RDBC.CD', 'DT.NFL.RDBN.CD']
+    return px.pie(idsdata_[(idsdata_['Country Code'] == country_val) & (idsdata_['Year'] == time_val) & (idsdata_['Indicator Code'].isin(
+        ind_list))], values='Value', names='Indicator Name', title='Net financial flow from various agencies')
+
+
+@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
+def update_table(country_val, ind_val, time_val):
+    print(time_val)
+    ind_list = ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'] if ind_val == 'mode' else [
+        'DT.NFL.IMFC.CD', 'DT.NFL.IMFN.CD', 'DT.NFL.MIBR.CD', 'DT.NFL.MIDA.CD', 'DT.NFL.RDBC.CD', 'DT.NFL.RDBN.CD']
     return [
         html.Label('Data'),
-        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (
-            idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], max_rows=np.inf)
+        generate_table(idsdata_[(idsdata_['Country Code'] == country_val) & (idsdata_['Indicator Code'].isin(ind_list)) & (
+            idsdata_['Year'] == time_val)], max_rows=np.inf)
     ]
 
 
-@app.callback(Output('Range', 'children'), [Input('time-window-slider', 'value')])
+@app.callback(Output('year_holder', 'children'), [Input('time', 'value')])
 def update_range_display(time_val):
-    return [html.Label('{} - {}'.format(time_val[0], time_val[1]))]
+    return [html.Label(time_val)]
 
 
 app.layout = html.Div(className="row", children=[

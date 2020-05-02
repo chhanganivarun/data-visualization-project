@@ -115,23 +115,20 @@ world_map = dcc.Graph(id='world-map', figure=px.choropleth(
 # ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD']
 stacked_bar_graph = dcc.Graph(id='stacked-bar-graph', figure=go.Figure(data=[
     go.Bar(name='Net financial flows, bilateral (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
     go.Bar(name='Net financial flows, multilateral (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
     go.Bar(name='Net financial flows, others (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
 ], layout={'barmode': 'stack'}))
 bar_graph = dcc.Graph(id='bar-graph', figure=go.Figure(data=[
     go.Bar(name='Net financial flows, bilateral (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
     go.Bar(name='Net financial flows, multilateral (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
     go.Bar(name='Net financial flows, others (NFL, current US$)', x=['IND', 'CHN'], y=idsdata_[(idsdata_[
-           'Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == 2008)]['Value'].to_list()),
+           'Country Code'].isin(sorted(['IND', 'CHN']))) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == 2008)].sort_values('Country Code')['Value'].to_list()),
 ]))
-
-indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
 
 
 main_space = html.Div(className="mid-pane", children=[
@@ -178,37 +175,105 @@ def update_world_map(selected_value):
 
 
 @app.callback(Output('stacked-bar-graph', 'figure'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
-def update_stacked_bar_graph(country_vals, ind_val, time_val):
+def update_stacked_bar_graph(country_values, ind_val, time_val):
+    country_vals = sorted(country_values)
     if ind_val == 'mode':
         return go.Figure(data=[
             go.Bar(name='Net financial flows, bilateral (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
             go.Bar(name='Net financial flows, multilateral (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
             go.Bar(name='Net financial flows, others (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
         ], layout={'barmode': 'stack'})
     elif ind_val == 'source':
-        pass
+        imf = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) +\
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        rdb = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) +\
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        ibr = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIBR.CD') & (
+            idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        ida = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIDA.CD') & (
+            idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        return go.Figure(data=[
+            go.Bar(name='IMF (NFL, current US$)',
+                   x=country_vals, y=imf),
+            go.Bar(name='RDB (NFL, current US$)',
+                   x=country_vals, y=rdb),
+            go.Bar(name='IBR (NFL, current US$)',
+                   x=country_vals, y=ibr),
+            go.Bar(name='IDA (NFL, current US$)',
+                   x=country_vals, y=ida),
+        ], layout={'barmode': 'stack'})
+
     else:  # ind_val == 'type'
-        pass
+        concessional = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')[
+            'Value'].to_list()) + np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+
+        nonconcessional = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIBR.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIDA.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFN.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+
+        return go.Figure(data=[
+            go.Bar(name='Concessional (NFL, current US$)',
+                   x=country_vals, y=concessional),
+            go.Bar(name='Non-Concessional (NFL, current US$)',
+                   x=country_vals, y=nonconcessional),
+        ], layout={'barmode': 'stack'})
 
 
 @app.callback(Output('bar-graph', 'figure'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
-def update_stacked_bar_graph(country_vals, ind_val, time_val):
+def update_bar_graph(country_values, ind_val, time_val):
+    country_vals = sorted(country_values)
     if ind_val == 'mode':
         return go.Figure(data=[
             go.Bar(name='Net financial flows, bilateral (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.BLAT.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
             go.Bar(name='Net financial flows, multilateral (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MLAT.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
             go.Bar(name='Net financial flows, others (NFL, current US$)', x=country_vals, y=idsdata_[(idsdata_[
-                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == time_val)]['Value'].to_list()),
+                'Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()),
         ])
     elif ind_val == 'source':
-        pass
+        imf = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) +\
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        rdb = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) +\
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        ibr = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIBR.CD') & (
+            idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        ida = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIDA.CD') & (
+            idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        return go.Figure(data=[
+            go.Bar(name='IMF (NFL, current US$)',
+                   x=country_vals, y=imf),
+            go.Bar(name='RDB (NFL, current US$)',
+                   x=country_vals, y=rdb),
+            go.Bar(name='IBR (NFL, current US$)',
+                   x=country_vals, y=ibr),
+            go.Bar(name='IDA (NFL, current US$)',
+                   x=country_vals, y=ida),
+        ])
     else:  # ind_val == 'type'
-        pass
+        concessional = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')[
+            'Value'].to_list()) + np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBC.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+
+        nonconcessional = np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIBR.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.MIDA.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.IMFN.CD') & (idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list()) + \
+            np.array(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == 'DT.NFL.RDBN.CD') & (
+                idsdata_['Year'] == time_val)].sort_values('Country Code')['Value'].to_list())
+        return go.Figure(data=[
+            go.Bar(name='Concessional (NFL, current US$)',
+                   x=country_vals, y=concessional),
+            go.Bar(name='Non-Concessional (NFL, current US$)',
+                   x=country_vals, y=nonconcessional),
+        ])
 
 
 @app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('feature', 'value'), Input('time', 'value')])
@@ -219,7 +284,7 @@ def update_table(country_vals, ind_val, time_val):
     return [
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'].isin(ind_list)) & (
-            idsdata_['Year'] <= 2018)], max_rows=np.inf)
+            idsdata_['Year'] == time_val)], max_rows=np.inf)
     ]
 
 
@@ -235,7 +300,6 @@ app.layout = html.Div(className="row", children=[
     main_space,
 ])
 # webbrowser.open('http://localhost:8050', new=2)
-print(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True, use_reloader=True)
