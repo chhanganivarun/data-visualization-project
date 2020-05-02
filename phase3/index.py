@@ -3,6 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
+import plotly.express as px
+from dash.dependencies import Input, Output
 
 external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css',
@@ -19,6 +21,9 @@ country.drop(['Unnamed: 31'], axis=1, inplace=True)
 idsdata = pd.read_csv('../IDS_CSV/IDSData.csv')
 idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
 
+idsdata_ = idsdata.melt(id_vars=['Country Name', 'Country Code', 'Indicator Name',
+                                 'Indicator Code'], var_name='Year', value_name='Value').fillna(0)
+
 footnote = pd.read_csv('../IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
 
@@ -27,7 +32,7 @@ series.drop(['Unnamed: 20'], axis=1, inplace=True)
 
 series_time = pd.read_csv('../IDS_CSV/IDSseries-time.csv')
 series_time.drop(['Unnamed: 3'], axis=1, inplace=True)
-print('CSVs loaded')
+
 ind_str = """
 Net financial flows, others
 Net financial flows, bilateral (NFL, current US$)"""
@@ -43,6 +48,8 @@ countries = idsdata[['Country Code', 'Country Name']]
 countries = countries.drop_duplicates()
 countries_codes_names = [(x, y) for x, y in zip(
     countries['Country Code'].to_list(), countries['Country Name'].to_list())]
+indicator_codes_names = [(x, y) for x, y in zip(
+    series['Series Code'].to_list(), series['Indicator Name'].to_list())]
 
 all_indicators = pd.unique(idsdata['Indicator Name'])
 
@@ -60,9 +67,7 @@ idsdata[(idsdata['Country Code'].isin(country_codes)) &
         (idsdata['Indicator Code'].isin(indicator_codes))]
 
 
-dropdown_options = [{'label': x, 'value': y} for x, y in countries_codes_names]
-
-print('initial processing')
+dropdown_options = [{'label': y, 'value': x} for x, y in countries_codes_names]
 
 
 def generate_table(dataframe, max_rows=10):
@@ -80,7 +85,6 @@ def generate_table(dataframe, max_rows=10):
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-print('app started')
 
 side_elements = html.Div(className='column', children=[
     html.Div(className='table-pane', children=[
@@ -94,7 +98,6 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
-print('side_elements generated')
 main_space = html.Div(className="mid-pane", children=[
     html.Label('Dropdown'),
     dcc.Dropdown(
@@ -102,34 +105,56 @@ main_space = html.Div(className="mid-pane", children=[
         value='IND'
     ),
 
-    html.Label('Multi-Select Dropdown'),
+    html.Label('Countries'),
     dcc.Dropdown(
+        id='countries',
         options=dropdown_options,
-        value=['IND', 'CHN'],
+        value=['IND', ],
         multi=True
+    ),
+    html.Label('Indicator'),
+    dcc.Dropdown(
+        id='indicators',
+        options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
+        value=[],
     ),
     html.Label('Slider'),
     dcc.Slider(
-        min=0,
-        max=9,
+        min=1970,
+        max=2026,
         marks={i: 'Label {}'.format(i) if i == 1 else str(i)
                for i in range(1, 6)},
         value=5,
     ),
 
 ])
-print('main_space generated')
+world_map = dcc.Graph(id='world-map', figure=px.choropleth(
+    locations=["CHN", "USA", "IND", 'LMY', 'EAP']))
 
-print('Main')
+
+indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND'])) &
+                                                                              (idsdata_['Indicator Code'].isin(['DT.NFL.MOTH.CD']))], x="Year", y="Value", color='Country Name'))
+
+
+@app.callback(Output('world-map', 'figure'), [Input('countries', 'value')])
+def update_world_map(selected_value):
+    return px.choropleth(locations=selected_value)
+
+
+@app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value')])
+def update_ind_line_chart(country_vals, ind_vals):
+    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'].isin(ind_vals))], x="Year", y="Value", color='Country Name')
+
+
 app.layout = html.Div(className="row", children=[
     html.Div(className="left-panel", children=[
         side_elements
     ]),
-    main_space
+    main_space,
+    world_map,
+    indicator_line_chart
 ])
-print('layout')
 
 
 if __name__ == '__main__':
     app.run_server(debug=True, use_reloader=True)
-    print(app.hostname)
