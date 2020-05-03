@@ -95,6 +95,14 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
+explaination = """
+# MCI
+## grants
+India and Pakistan
+Pakistan observed a sudden decrease in grants received by it after 2011, when Osama was encountered.
+In 2016, due to America's pro-America policy in Trump rule, grants saw a decrease in all under developed countries
+This is especially profound in Arab Islamic Countries.
+"""
 side_elements = html.Div(className='column', children=[
     html.Div(id='mci-table', className='table-pane', children=[
         html.Label('Data'),
@@ -103,7 +111,7 @@ side_elements = html.Div(className='column', children=[
 
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('text'),
+        dcc.Markdown(explaination)
         # generate_table(df, np.inf),
     ]),
 
@@ -124,7 +132,7 @@ main_space = html.Div(className="mid-pane", children=[
     dcc.Dropdown(
         id='mci-countries',
         options=dropdown_options,
-        value=['IND', 'CHN'],
+        value=['IND', 'CHN', 'BRA', 'RUS', 'ZAF', 'PAK'],
         multi=True
     ),
 

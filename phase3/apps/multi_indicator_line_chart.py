@@ -93,6 +93,21 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
+explaination = """
+# MLI
+India
+NFL: bilateral, multilateral, others
+India has been a part of development prorams of several countries in the past and also participated in multilateral ties for development in out of nation plans.
+However, now the focus of the country seems more to its own growth. This can also been as an effect of Make in India campaign
+
+China
+NFL: bilateral, multilateral, others
+China has a cyclic habit of giving loan to poor countries in exchange of a long term lease or mortgage. China also has a record of confiscating territories for which countries took loan to develop.
+
+Pakistan
+In stark contrast to China, which is also one of the major lender of pakistan nowadays (see 2015-2018 bilateral), Pakistan has a habit of cyclically taking loans, defaulting on them and then taking more of them
+
+"""
 side_elements = html.Div(className='column', children=[
     html.Div(id='mli-table', className='table-pane', children=[
         html.Label('Data'),
@@ -101,7 +116,7 @@ side_elements = html.Div(className='column', children=[
 
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('text'),
+        dcc.Markdown(explaination)
         # generate_table(df, np.inf),
     ]),
 

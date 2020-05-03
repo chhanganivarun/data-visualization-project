@@ -94,6 +94,12 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
+explaination = """
+# Stacked Bar
+## Type
+About 10 pc. of Pakistan's debts are concessionals due to its habit of defaulting
+"""
+
 side_elements = html.Div(className='column', children=[
     html.Div(id='bar-table', className='table-pane', children=[
         html.Label('Data'),
@@ -102,7 +108,7 @@ side_elements = html.Div(className='column', children=[
 
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('text'),
+        dcc.Markdown(explaination)
         # generate_table(df, np.inf),
     ]),
 
@@ -136,7 +142,7 @@ main_space = html.Div(className="mid-pane", children=[
     dcc.Dropdown(
         id='bar-countries',
         options=dropdown_options,
-        value=['IND', 'CHN'],
+        value=['IND', 'CHN', 'BRA', 'RUS', 'ZAF', 'PAK'],
         multi=True
     ),
 

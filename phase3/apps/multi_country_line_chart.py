@@ -93,6 +93,40 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
+explaination = """
+# MLC
+
+## Commitments IDA
+
+India has made large commitments for development. The amount of loan taken reached its peak in around 2010.
+
+## PPG IBRD DOD
+
+India, Brazil and China have taken a loan of around $15 billion for development assistance and poverty reduction.
+
+## Debt forgiveness grants
+Pakistan has defaulted loan of nearly $1Bn in 2003 and of around $75Mn in 2010.
+
+## IMF repurchases
+Repurchases are agreement to buy back the mortgage that is temporarily lended as security
+Brazil peaked around 2005 due to the advancing the infrastructure of Rio Olympics.
+
+## principal repayments public sector
+In the great depression of 2008, all the countries' reyments fell down except the 2 largely communist nations that are russia and china.
+Most of the countries except few countries like pakistan seems to have recovered this recession on large.
+
+## Personal transfers and compensation
+India and China are world leaders in providing high skilled labour to overseas market.
+Thus, we observe a high amount fo personal transfers and compenstaion.
+
+We also observe that after the US 2016 elections, and the winning of pro-american policy of trump, this number suddenly dropped.
+This number is especially significant for china as trump is very much against china
+
+## Export of goods services and primary income
+China has been since always been a global leader in export of goods and services.
+A slump can be observed in 2016 figure again due to Trump's anti China policies
+"""
+
 side_elements = html.Div(className='column', children=[
     html.Div(id='mlc-table', className='table-pane', children=[
         html.Label('Data'),
@@ -101,7 +135,7 @@ side_elements = html.Div(className='column', children=[
 
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('text'),
+        dcc.Markdown(explaination)
         # generate_table(df, np.inf),
     ]),
 
@@ -122,7 +156,7 @@ main_space = html.Div(className="mid-pane", children=[
     dcc.Dropdown(
         id='mlc-countries',
         options=dropdown_options,
-        value=['IND', 'CHN'],
+        value=['IND', 'CHN', 'BRA', 'RUS', 'ZAF', 'PAK'],
         multi=True
     ),
 

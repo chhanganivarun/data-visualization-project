@@ -92,6 +92,12 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
+explaination = """
+# Pie chart
+India mode of Debt
+India has changed its policy more towards bilateral commitments than multilateral in the Modi Government.
+"""
+
 side_elements = html.Div(className='column', children=[
     html.Div(id='pie-table', className='table-pane', children=[
         html.Label('Data'),
