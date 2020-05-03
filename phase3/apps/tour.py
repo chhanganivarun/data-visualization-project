@@ -11,8 +11,8 @@ from app import app
 
 
 external_stylesheets = [
-    'https://codepen.io/chriddyp/pen/bWLwgP.css',
-    './assets/index.css',
+    'assets/bWLwgP.css',
+    'assets/index.css',
 ]
 
 country_series = pd.read_csv('res/IDS_CSV/IDScountry-series.csv')
@@ -182,17 +182,14 @@ def update_range_display(time_val):
 layout = [html.Div(children=[
     html.Div(className='row', children=[
         dcc.Link('Tour', href='/'),
-        html.Br(),
         dcc.Link('Country Wise Breakup of Debt',
                  href='/pie-chart', style={"margin-left": "15px"}),
-        html.Label(' '),
         dcc.Link('Debt Breakup Comparison', href='/stacked-bar',
                  style={"margin-left": "15px"}),
-        html.Label(' '),
         dcc.Link('Explore Countries', href='/mlc',
                  style={"margin-left": "15px"}),
-        html.Label(' '),
-
+        dcc.Link('Explore Indicators', href='/mli',
+                 style={"margin-left": "15px"}),
     ]),
     html.Div(className="row", children=[
         html.Div(className="left-panel", children=[

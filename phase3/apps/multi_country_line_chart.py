@@ -10,8 +10,8 @@ from dash.dependencies import Input, Output
 from app import app
 
 external_stylesheets = [
-    'https://codepen.io/chriddyp/pen/bWLwgP.css',
-    './assets/index.css',
+    'assets/bWLwgP.css',
+    'assets/index.css',
 ]
 
 country_series = pd.read_csv('res/IDS_CSV/IDScountry-series.csv')
@@ -94,7 +94,7 @@ def generate_table(dataframe, max_rows=10):
 
 
 side_elements = html.Div(className='column', children=[
-    html.Div(id='mcl-table', className='table-pane', children=[
+    html.Div(id='mlc-table', className='table-pane', children=[
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_[
                        'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], max_rows=np.inf)
@@ -107,11 +107,11 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
-world_map = dcc.Graph(id='mcl-world-map', figure=px.choropleth(
+world_map = dcc.Graph(id='mlc-world-map', figure=px.choropleth(
     locations=['IND', 'CHN']))
 
 
-indicator_line_chart = dcc.Graph(id='mcl-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
+indicator_line_chart = dcc.Graph(id='mlc-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
                                                                                   (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
 
 
@@ -120,7 +120,7 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Countries'),
     dcc.Dropdown(
-        id='mcl-countries',
+        id='mlc-countries',
         options=dropdown_options,
         value=['IND', 'CHN'],
         multi=True
@@ -128,14 +128,14 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Indicator'),
     dcc.Dropdown(
-        id='mcl-indicators',
+        id='mlc-indicators',
         options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
         value='DT.NFL.MOTH.CD',
     ),
 
     html.Label('Time window'),
     dcc.RangeSlider(
-        id='mcl-time-window-slider',
+        id='mlc-time-window-slider',
         min=1970,
         max=2018,
         marks={i: 'Label {}'.format(i) if i == 1 else str(i)
@@ -144,7 +144,7 @@ main_space = html.Div(className="mid-pane", children=[
         step=1,
         value=[2008, 2018]
     ),
-    html.Div(id='mcl-Range', children=[
+    html.Div(id='mlc-Range', children=[
         html.Label('2000 - 2000'),
     ]),
 
@@ -181,17 +181,14 @@ def update_range_display(time_val):
 layout = [html.Div(children=[
     html.Div(className='row', children=[
         dcc.Link('Tour', href='/'),
-        html.Br(),
         dcc.Link('Country Wise Breakup of Debt',
                  href='/pie-chart', style={"margin-left": "15px"}),
-        html.Label(' '),
         dcc.Link('Debt Breakup Comparison', href='/stacked-bar',
                  style={"margin-left": "15px"}),
-        html.Label(' '),
         dcc.Link('Explore Countries', href='/mlc',
                  style={"margin-left": "15px"}),
-        html.Label(' '),
-
+        dcc.Link('Explore Indicators', href='/mli',
+                 style={"margin-left": "15px"}),
     ]),
     html.Div(className="row", children=[
         html.Div(className="left-panel", children=[

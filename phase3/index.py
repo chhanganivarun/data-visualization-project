@@ -1,4 +1,4 @@
-from apps import tour, stacked_bar, pie_chart, multi_country_line_chart
+from apps import tour, stacked_bar, pie_chart, multi_country_line_chart, multi_indicator_line_chart
 from app import app
 import dash_core_components as dcc
 import dash_html_components as html
@@ -23,6 +23,8 @@ def display_page(pathname):
         return stacked_bar.layout
     elif pathname == '/mlc':
         return multi_country_line_chart.layout
+    elif pathname == '/mli':
+        return multi_indicator_line_chart.layout
     else:
         return '404'
 
@@ -30,4 +32,4 @@ def display_page(pathname):
 # webbrowser.open('http://localhost:8050', new=2)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False, use_reloader=True)
