@@ -167,7 +167,7 @@ def update_chart(value):
                          'Year', 'Country Code', 'Country Name'], how='outer').fillna(0)
         temp3['Grants'] = temp3['Value_x'] + temp3['Value_y']
         temp3[['Country Code', 'Country Name', 'Year', 'Grants']]
-        years = [2008, 2018]
+        years = [2008, 2016]
         df = temp3[(temp3['Country Code'].isin(countries)) & (temp3[
             'Year'] <= 2018) & (temp3['Year'] >= years[0]) & (temp3['Year'] <= years[1])].sort_values(['Country Code', 'Year'])
         return px.line(df, x="Year", y="Grants", color='Country Name')
@@ -195,7 +195,7 @@ def update_table(value):
                          'Year', 'Country Code', 'Country Name'], how='outer').fillna(0)
         temp3['Grants'] = temp3['Value_x'] + temp3['Value_y']
         temp3[['Country Code', 'Country Name', 'Year', 'Grants']]
-        years = [2008, 2018]
+        years = [2008, 2016]
         df = temp3[(temp3['Country Code'].isin(countries)) & (temp3[
             'Year'] <= 2018) & (temp3['Year'] >= years[0]) & (temp3['Year'] <= years[1])]
         return [

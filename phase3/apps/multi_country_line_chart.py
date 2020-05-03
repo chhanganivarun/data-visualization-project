@@ -180,16 +180,15 @@ def update_range_display(time_val):
 
 layout = [html.Div(children=[
     html.Div(className='row', children=[
-        dcc.Link('Tour', href='/'),
-        dcc.Link('Country Wise Breakup of Debt',
-                 href='/pie-chart', style={"margin-left": "15px"}),
-        dcc.Link('Debt Breakup Comparison', href='/stacked-bar',
+        dcc.Link('Explore Indicators and Countries', href='/',
                  style={"margin-left": "15px"}),
         dcc.Link('Explore Countries', href='/mlc',
                  style={"margin-left": "15px"}),
         dcc.Link('Explore Indicators', href='/mli',
                  style={"margin-left": "15px"}),
-        dcc.Link('Explore Indicators and Countries', href='/mci',
+        dcc.Link('Country Wise Breakup of Debt',
+                 href='/pie-chart', style={"margin-left": "15px"}),
+        dcc.Link('Debt Breakup Comparison', href='/stacked-bar',
                  style={"margin-left": "15px"}),
     ]),
     html.Div(className="row", children=[
