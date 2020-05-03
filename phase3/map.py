@@ -13,7 +13,8 @@ external_stylesheets = [
     './assets/index.css',
 ]
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/c78bf172206ce24f77d6363a2d754b59/raw/c353e8ef842413cae56ae3920b8fd78468aa4cb2/usa-agricultural-exports-2011.csv')
-
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.config.suppress_callback_exceptions = True
 country_series = pd.read_csv('../IDS_CSV/IDScountry-series.csv')
 country_series.drop(['Unnamed: 3'], axis=1, inplace=True)
 
@@ -92,9 +93,6 @@ def generate_table(dataframe, max_rows=10):
     ])
 
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-
 side_elements = html.Div(className='column', children=[
     html.Div(id='table', className='table-pane', children=[
         html.Label('Data'),
@@ -158,7 +156,34 @@ main_space = html.Div(className="mid-pane", children=[
     bar_graph,
 
 ])
+page1Layout = html.Div(className="row", children=[
+    html.Div(className="left-panel", children=[
+        side_elements
+    ]),
+    main_space,
+    html.Div(id='page-1-content'),
+    html.Br(),
+    dcc.Link('Go to Page 2', href='/page-2'),
+    html.Br(),
+    dcc.Link('Go back to home', href='/'),
+])
 
+page2Layout = html.Div(className="row", children=[
+    html.Div(className="left-panel", children=[
+        side_elements
+    ]),
+    main_space,
+    html.Div(id='page-2-content'),
+    html.Br(),
+    dcc.Link('Go to Page 1', href='/page-1'),
+    html.Br(),
+    dcc.Link('Go back to home', href='/')
+])
+index_page = html.Div([
+    dcc.Link('Go to Page 1', href='/page-1'),
+    html.Br(),
+    dcc.Link('Go to Page 2', href='/page-2'),
+])
 
 @app.callback(Output('world-map', 'figure'), [Input('countries', 'value')])
 def update_world_map(selected_value):
@@ -201,13 +226,23 @@ def update_table(country_val, ind_val, time_val):
 def update_range_display(time_val):
     return [html.Label(time_val)]
 
+@app.callback(dash.dependencies.Output('page-content', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/page-1':
+        return page1Layout
+    elif pathname == '/page-2':
+        return page2Layout
+    else:
+        return index_page
+    # You could also return a 404 "URL not found" page here
 
-app.layout = html.Div(className="row", children=[
-    html.Div(className="left-panel", children=[
-        side_elements
-    ]),
-    main_space,
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
 ])
+
+
 # webbrowser.open('http://localhost:8050', new=2)
 print(app)
 
