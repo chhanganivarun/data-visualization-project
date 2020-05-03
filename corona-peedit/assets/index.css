@@ -1,0 +1,37 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+.row {
+	display: flex;
+}
+
+.left-panel {
+	display: flex;
+	flex-direction: column;
+	width: 30%;
+	height: 100vh;
+}
+
+.table-pane {
+	height: 50vh;
+	overflow: auto;
+}
+
+.text-pane {
+	height: 47vh;
+	overflow: auto;
+}
+
+.mid-pane {
+	width: 70%;
+	height: 97vh;
+	margin-left: 2px;
+	overflow: auto;
+}
+
+.slider-pane {
+	width: 70%;
+	margin-left: 15px;
+}

@@ -106,7 +106,7 @@ side_elements = html.Div(className='column', children=[
 
     ]),
     html.Div(className='text-pane', children=[
-        html.Label('text'),
+        dcc.Markdown(explaination)
         # generate_table(df, np.inf),
     ]),
 
