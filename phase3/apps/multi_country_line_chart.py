@@ -14,30 +14,26 @@ external_stylesheets = [
     './assets/index.css',
 ]
 
-country_series = pd.read_csv('../res/IDS_CSV/IDScountry-series.csv')
+country_series = pd.read_csv('res/IDS_CSV/IDScountry-series.csv')
 country_series.drop(['Unnamed: 3'], axis=1, inplace=True)
-print('../res/IDS_CSV/IDScountry-series.csv')
 
 country = pd.read_csv('res/IDS_CSV/IDSCountry.csv')
 country.drop(['Unnamed: 31'], axis=1, inplace=True)
-print('res/IDS_CSV/IDSCountry.csv')
 
-idsdata = pd.read_csv('/res/IDS_CSV/IDSData.csv')
+idsdata = pd.read_csv('res/IDS_CSV/IDSData.csv')
 idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
-print('/res/IDS_CSV/IDSData.csv')
 
 idsdata_ = idsdata.melt(id_vars=['Country Name', 'Country Code', 'Indicator Name',
                                  'Indicator Code'], var_name='Year', value_name='Value').fillna(0)
 idsdata_['Year'] = idsdata_['Year'].apply(lambda x: int(x))
 
-footnote = pd.read_csv('../../IDS_CSV/IDSfootnote.csv')
+footnote = pd.read_csv('res/IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
-print('../../IDS_CSV/IDSfootnote.csv')
 
-series = pd.read_csv('../res/IDS_CSV/IDSSeries.csv')
+series = pd.read_csv('res/IDS_CSV/IDSSeries.csv')
 series.drop(['Unnamed: 20'], axis=1, inplace=True)
 
-series_time = pd.read_csv('../res/IDS_CSV/IDSseries-time.csv')
+series_time = pd.read_csv('res/IDS_CSV/IDSseries-time.csv')
 series_time.drop(['Unnamed: 3'], axis=1, inplace=True)
 
 ind_str = """
@@ -98,7 +94,7 @@ def generate_table(dataframe, max_rows=10):
 
 
 side_elements = html.Div(className='column', children=[
-    html.Div(id='table', className='table-pane', children=[
+    html.Div(id='mcl-table', className='table-pane', children=[
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_[
                        'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], max_rows=np.inf)
@@ -111,12 +107,12 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
-world_map = dcc.Graph(id='world-map', figure=px.choropleth(
+world_map = dcc.Graph(id='mcl-world-map', figure=px.choropleth(
     locations=['IND', 'CHN']))
 
 
-indicator_line_chart = dcc.Graph(id='ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                              (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
+indicator_line_chart = dcc.Graph(id='mcl-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
+                                                                                  (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
 
 
 main_space = html.Div(className="mid-pane", children=[
@@ -124,7 +120,7 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Countries'),
     dcc.Dropdown(
-        id='countries',
+        id='mcl-countries',
         options=dropdown_options,
         value=['IND', 'CHN'],
         multi=True
@@ -132,14 +128,14 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Indicator'),
     dcc.Dropdown(
-        id='indicators',
+        id='mcl-indicators',
         options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
         value='DT.NFL.MOTH.CD',
     ),
 
     html.Label('Time window'),
     dcc.RangeSlider(
-        id='time-window-slider',
+        id='mcl-time-window-slider',
         min=1970,
         max=2018,
         marks={i: 'Label {}'.format(i) if i == 1 else str(i)
@@ -148,7 +144,7 @@ main_space = html.Div(className="mid-pane", children=[
         step=1,
         value=[2008, 2018]
     ),
-    html.Div(id='Range', children=[
+    html.Div(id='mcl-Range', children=[
         html.Label('2000 - 2000'),
     ]),
 
@@ -158,17 +154,17 @@ main_space = html.Div(className="mid-pane", children=[
 ])
 
 
-@app.callback(Output('world-map', 'figure'), [Input('countries', 'value')])
+@app.callback(Output('mlc-world-map', 'figure'), [Input('mlc-countries', 'value')])
 def update_world_map(selected_value):
     return px.choropleth(locations=selected_value)
 
 
-@app.callback(Output('ind-line-chart', 'figure'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
+@app.callback(Output('mlc-ind-line-chart', 'figure'), [Input('mlc-countries', 'value'), Input('mlc-indicators', 'value'), Input('mlc-time-window-slider', 'value')])
 def update_ind_line_chart(country_vals, ind_val, time_val):
     return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
 
 
-@app.callback(Output('table', 'children'), [Input('countries', 'value'), Input('indicators', 'value'), Input('time-window-slider', 'value')])
+@app.callback(Output('mlc-table', 'children'), [Input('mlc-countries', 'value'), Input('mlc-indicators', 'value'), Input('mlc-time-window-slider', 'value')])
 def update_table(country_vals, ind_val, time_val):
     return [
         html.Label('Data'),
@@ -177,14 +173,25 @@ def update_table(country_vals, ind_val, time_val):
     ]
 
 
-@app.callback(Output('Range', 'children'), [Input('time-window-slider', 'value')])
+@app.callback(Output('mlc-Range', 'children'), [Input('mlc-time-window-slider', 'value')])
 def update_range_display(time_val):
     return [html.Label('{} - {}'.format(time_val[0], time_val[1]))]
 
 
-layout = html.Div(children=[
+layout = [html.Div(children=[
     html.Div(className='row', children=[
-        # Hyper links
+        dcc.Link('Tour', href='/'),
+        html.Br(),
+        dcc.Link('Country Wise Breakup of Debt',
+                 href='/pie-chart', style={"margin-left": "15px"}),
+        html.Label(' '),
+        dcc.Link('Debt Breakup Comparison', href='/stacked-bar',
+                 style={"margin-left": "15px"}),
+        html.Label(' '),
+        dcc.Link('Explore Countries', href='/mlc',
+                 style={"margin-left": "15px"}),
+        html.Label(' '),
+
     ]),
     html.Div(className="row", children=[
         html.Div(className="left-panel", children=[
@@ -192,4 +199,4 @@ layout = html.Div(children=[
         ]),
         main_space,
     ])
-])
+])]
