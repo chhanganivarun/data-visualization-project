@@ -17,9 +17,9 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return tour.layout
-    if pathname == '/pie_chart':
+    if pathname == '/pie-chart':
         return pie_chart.layout
-    elif pathname == '/stacked_bar':
+    elif pathname == '/stacked-bar':
         return stacked_bar.layout
     elif pathname == '/mlc':
         return multi_country_line_chart.layout
