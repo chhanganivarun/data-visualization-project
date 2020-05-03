@@ -301,6 +301,8 @@ layout = [html.Div(children=[
                  style={"margin-left": "15px"}),
         dcc.Link('Explore Indicators', href='/mli',
                  style={"margin-left": "15px"}),
+        dcc.Link('Explore Indicators and Countries', href='/mci',
+                 style={"margin-left": "15px"}),
     ]),
     html.Div(className="row", children=[
         html.Div(className="left-panel", children=[

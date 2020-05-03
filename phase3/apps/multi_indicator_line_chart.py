@@ -156,7 +156,7 @@ main_space = html.Div(className="mid-pane", children=[
 
 @app.callback(Output('mli-world-map', 'figure'), [Input('mli-countries', 'value')])
 def update_world_map(selected_value):
-    return px.choropleth(locations=selected_value)
+    return px.choropleth(locations=[selected_value])
 
 
 @app.callback(Output('mli-ind-line-chart', 'figure'), [Input('mli-countries', 'value'), Input('mli-indicators', 'value'), Input('mli-time-window-slider', 'value')])
@@ -188,6 +188,8 @@ layout = [html.Div(children=[
         dcc.Link('Explore Countries', href='/mlc',
                  style={"margin-left": "15px"}),
         dcc.Link('Explore Indicators', href='/mli',
+                 style={"margin-left": "15px"}),
+        dcc.Link('Explore Indicators and Countries', href='/mci',
                  style={"margin-left": "15px"}),
     ]),
     html.Div(className="row", children=[

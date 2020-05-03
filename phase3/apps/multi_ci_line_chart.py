@@ -26,6 +26,8 @@ idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
 idsdata_ = idsdata.melt(id_vars=['Country Name', 'Country Code', 'Indicator Name',
                                  'Indicator Code'], var_name='Year', value_name='Value').fillna(0)
 idsdata_['Year'] = idsdata_['Year'].apply(lambda x: int(x))
+idsdata_['CI Name'] = idsdata_['Country Name'] + \
+    idsdata_['Country Name'].apply(lambda x: ', ')+idsdata_['Indicator Name']
 
 footnote = pd.read_csv('res/IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
@@ -94,10 +96,10 @@ def generate_table(dataframe, max_rows=10):
 
 
 side_elements = html.Div(className='column', children=[
-    html.Div(id='mlc-table', className='table-pane', children=[
+    html.Div(id='mci-table', className='table-pane', children=[
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_[
-                       'Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], max_rows=np.inf)
+                       'Indicator Code'].isin(['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'])) & (idsdata_['Year'] <= 2018)], max_rows=np.inf)
 
     ]),
     html.Div(className='text-pane', children=[
@@ -107,12 +109,12 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
-world_map = dcc.Graph(id='mlc-world-map', figure=px.choropleth(
+world_map = dcc.Graph(id='mci-world-map', figure=px.choropleth(
     locations=['IND', 'CHN']))
 
 
-indicator_line_chart = dcc.Graph(id='mlc-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                                  (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
+indicator_line_chart = dcc.Graph(id='mci-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) & (idsdata_['Indicator Code'].isin(
+    ['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'])) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= 2008) & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color="Indicator Name"))
 
 
 main_space = html.Div(className="mid-pane", children=[
@@ -120,7 +122,7 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Countries'),
     dcc.Dropdown(
-        id='mlc-countries',
+        id='mci-countries',
         options=dropdown_options,
         value=['IND', 'CHN'],
         multi=True
@@ -128,14 +130,15 @@ main_space = html.Div(className="mid-pane", children=[
 
     html.Label('Indicator'),
     dcc.Dropdown(
-        id='mlc-indicators',
+        id='mci-indicators',
         options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
-        value='DT.NFL.MOTH.CD',
+        value=['DT.NFL.BLAT.CD', 'DT.NFL.MLAT.CD', 'DT.NFL.MOTH.CD'],
+        multi=True
     ),
 
     html.Label('Time window'),
     dcc.RangeSlider(
-        id='mlc-time-window-slider',
+        id='mci-time-window-slider',
         min=1970,
         max=2018,
         marks={i: 'Label {}'.format(i) if i == 1 else str(i)
@@ -144,7 +147,7 @@ main_space = html.Div(className="mid-pane", children=[
         step=1,
         value=[2008, 2018]
     ),
-    html.Div(id='mlc-Range', children=[
+    html.Div(id='mci-Range', children=[
         html.Label('2000 - 2000'),
     ]),
 
@@ -154,26 +157,26 @@ main_space = html.Div(className="mid-pane", children=[
 ])
 
 
-@app.callback(Output('mlc-world-map', 'figure'), [Input('mlc-countries', 'value')])
+@app.callback(Output('mci-world-map', 'figure'), [Input('mci-countries', 'value')])
 def update_world_map(selected_value):
     return px.choropleth(locations=selected_value)
 
 
-@app.callback(Output('mlc-ind-line-chart', 'figure'), [Input('mlc-countries', 'value'), Input('mlc-indicators', 'value'), Input('mlc-time-window-slider', 'value')])
+@app.callback(Output('mci-ind-line-chart', 'figure'), [Input('mci-countries', 'value'), Input('mci-indicators', 'value'), Input('mci-time-window-slider', 'value')])
 def update_ind_line_chart(country_vals, ind_val, time_val):
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
+    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'].isin(ind_val)) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="CI Name")
 
 
-@app.callback(Output('mlc-table', 'children'), [Input('mlc-countries', 'value'), Input('mlc-indicators', 'value'), Input('mlc-time-window-slider', 'value')])
+@app.callback(Output('mci-table', 'children'), [Input('mci-countries', 'value'), Input('mci-indicators', 'value'), Input('mci-time-window-slider', 'value')])
 def update_table(country_vals, ind_val, time_val):
     return [
         html.Label('Data'),
-        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (
+        generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'].isin(ind_val)) & (
             idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], max_rows=np.inf)
     ]
 
 
-@app.callback(Output('mlc-Range', 'children'), [Input('mlc-time-window-slider', 'value')])
+@app.callback(Output('mci-Range', 'children'), [Input('mci-time-window-slider', 'value')])
 def update_range_display(time_val):
     return [html.Label('{} - {}'.format(time_val[0], time_val[1]))]
 

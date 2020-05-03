@@ -27,6 +27,8 @@ idsdata.drop(['Unnamed: 61'], axis=1, inplace=True)
 idsdata_ = idsdata.melt(id_vars=['Country Name', 'Country Code', 'Indicator Name',
                                  'Indicator Code'], var_name='Year', value_name='Value').fillna(0)
 idsdata_['Year'] = idsdata_['Year'].apply(lambda x: int(x))
+idsdata_['CI Name'] = idsdata_['Country Name'] + \
+    idsdata_['Country Name'].apply(lambda x: ', ')+idsdata_['Indicator Name']
 
 footnote = pd.read_csv('res/IDS_CSV/IDSfootnote.csv')
 footnote.drop(['Unnamed: 4'], axis=1, inplace=True)
@@ -108,65 +110,98 @@ side_elements = html.Div(className='column', children=[
 
 ])
 
+slider_elements = html.Div(className='slider-pane', children=[
+    html.Label('Slide'),
+    dcc.Slider(
+        id='tour-slider',
+        min=1,
+        max=10,
+        value=1,
+    ),
+    html.Div(id='tour-progress', children=[
+        html.Label('1'),
+
+    ]),
+    html.Button('Back', id='tour-slide-back', n_clicks=0),
+    html.Button('Next', id='tour-slide-next', n_clicks=0),
+
+])
+
 world_map = dcc.Graph(id='tour-world-map', figure=px.choropleth(
     locations=['IND', 'CHN']))
 
 
-indicator_line_chart = dcc.Graph(id='tour-ind-line-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND', 'CHN'])) &
-                                                                                   (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='Country Name'))
+chart = dcc.Graph(id='tour-chart', figure=px.line(idsdata_[(idsdata_['Country Code'].isin(['IND'])) &
+                                                           (idsdata_['Indicator Code'] == 'DT.NFL.MOTH.CD') & (idsdata_['Year'] <= 2018)], x="Year", y="Value", color='CI Name'))
 
 
 main_space = html.Div(className="mid-pane", children=[
     world_map,
-
-    html.Label('Countries'),
-    dcc.Dropdown(
-        id='tour-countries',
-        options=dropdown_options,
-        value=['IND', 'CHN'],
-        multi=True
-    ),
-
-    html.Label('Indicator'),
-    dcc.Dropdown(
-        id='tour-indicators',
-        options=[{'label': y, 'value': x} for x, y in indicator_codes_names],
-        value='DT.NFL.MOTH.CD',
-    ),
-
-    html.Label('Time window'),
-    dcc.RangeSlider(
-        id='tour-time-window-slider',
-        min=1970,
-        max=2018,
-        marks={i: 'Label {}'.format(i) if i == 1 else str(i)
-               for i in range(1970, 2018, 10)},
-
-        step=1,
-        value=[2008, 2018]
-    ),
-    html.Div(id='tour-Range', children=[
-        html.Label('2000 - 2000'),
-    ]),
-
-
-    indicator_line_chart,
+    chart,
 
 ])
 
 
-@app.callback(Output('tour-world-map', 'figure'), [Input('tour-countries', 'value')])
-def update_world_map(selected_value):
-    return px.choropleth(locations=selected_value)
+@app.callback(Output('tour-slider', 'value'), [Input('tour-slide-back', 'n_clicks'), Input('tour-slide-next', 'n_clicks')])
+def on_click(back_click, next_click):
+    return min(max(1-back_click+next_click, 1), 10)
 
 
-@app.callback(Output('tour-ind-line-chart', 'figure'), [Input('tour-countries', 'value'), Input('tour-indicators', 'value'), Input('tour-time-window-slider', 'value')])
-def update_ind_line_chart(country_vals, ind_val, time_val):
-    return px.line(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (idsdata_['Year'] <= 2018) & (idsdata_['Year'] >= time_val[0]) & (idsdata_['Year'] <= time_val[1])], x="Year", y="Value", color="Country Name")
+@app.callback(Output('tour-progress', 'children'), [Input('tour-slider', 'value')])
+def on_change(value):
+    return [
+        html.Label(value)
+    ]
 
 
-@app.callback(Output('tour-table', 'children'), [Input('tour-countries', 'value'), Input('tour-indicators', 'value'), Input('tour-time-window-slider', 'value')])
-def update_table(country_vals, ind_val, time_val):
+@app.callback(Output('tour-chart', 'figure'), [(Input('tour-slider', 'value'))])
+def update_chart(value):
+    if value == 1:
+        countries = ['IND', 'CHN', 'PAK', 'RUS', 'BRA']
+        temp1 = idsdata_[idsdata_['Indicator Code'] ==
+                         'BX.GRT.EXTA.CD.DT'].sort_values('Country Code')
+        temp2 = idsdata_[idsdata_['Indicator Code'] ==
+                         'BX.GRT.TECH.CD.DT'].sort_values('Country Code')
+        # temp1.join(temp2,on = ['Country Code'],how = 'out')
+        temp3 = pd.merge(temp1, temp2, on=[
+                         'Year', 'Country Code', 'Country Name'], how='outer').fillna(0)
+        temp3['Grants'] = temp3['Value_x'] + temp3['Value_y']
+        temp3[['Country Code', 'Country Name', 'Year', 'Grants']]
+        years = [2008, 2018]
+        df = temp3[(temp3['Country Code'].isin(countries)) & (temp3[
+            'Year'] <= 2018) & (temp3['Year'] >= years[0]) & (temp3['Year'] <= years[1])].sort_values(['Country Code', 'Year'])
+        return px.line(df, x="Year", y="Grants", color='Country Name')
+
+
+@app.callback(Output('tour-world-map', 'figure'), [Input('tour-slider', 'value')])
+def update_world_map(value):
+    if value == 1:
+        locs = ['IND', 'CHN', 'PAK', 'RUS', 'BRA']
+        return px.choropleth(locations=locs)
+    else:
+        return px.choropleth(locations=['IND'])
+
+
+@app.callback(Output('tour-table', 'children'), [Input('tour-slider', 'value')])
+def update_table(value):
+    if value == 1:
+        countries = ['IND', 'CHN', 'PAK', 'RUS', 'BRA']
+        temp1 = idsdata_[idsdata_['Indicator Code'] ==
+                         'BX.GRT.EXTA.CD.DT'].sort_values('Country Code')
+        temp2 = idsdata_[idsdata_['Indicator Code'] ==
+                         'BX.GRT.TECH.CD.DT'].sort_values('Country Code')
+        # temp1.join(temp2,on = ['Country Code'],how = 'out')
+        temp3 = pd.merge(temp1, temp2, on=[
+                         'Year', 'Country Code', 'Country Name'], how='outer').fillna(0)
+        temp3['Grants'] = temp3['Value_x'] + temp3['Value_y']
+        temp3[['Country Code', 'Country Name', 'Year', 'Grants']]
+        years = [2008, 2018]
+        df = temp3[(temp3['Country Code'].isin(countries)) & (temp3[
+            'Year'] <= 2018) & (temp3['Year'] >= years[0]) & (temp3['Year'] <= years[1])]
+        return [
+            html.Label('Data'),
+            generate_table(df),
+        ]
     return [
         html.Label('Data'),
         generate_table(idsdata_[(idsdata_['Country Code'].isin(country_vals)) & (idsdata_['Indicator Code'] == ind_val) & (
@@ -190,6 +225,11 @@ layout = [html.Div(children=[
                  style={"margin-left": "15px"}),
         dcc.Link('Explore Indicators', href='/mli',
                  style={"margin-left": "15px"}),
+        dcc.Link('Explore Indicators and Countries', href='/mci',
+                 style={"margin-left": "15px"}),
+    ]),
+    html.Div(className="row", children=[
+        slider_elements
     ]),
     html.Div(className="row", children=[
         html.Div(className="left-panel", children=[
